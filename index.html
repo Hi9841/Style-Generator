@@ -3,62 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>7 - Style Generator</title>
+<title>CSS Style Generator</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <header>
     <h1>🎨 CSS Style Generator</h1>
+    <p>Create beautiful UI styles instantly.</p>
 </header>
-<main>
-    <section id="palette-section">
-        <h2>Choose a Color Palette</h2>
-        <div id="palettes-container"></div>
+
+<main class="layout">
+
+    <section class="panel">
+        <h2>Color Palettes</h2>
+        <div id="palettes-container" class="palette-grid"></div>
     </section>
 
-    <section id="settings-section">
-        <h2>Customize Fonts & Spacing</h2>
-        <div class="setting-group">
-            <label for="font-select">Font Family:</label>
-            <select id="font-select">
-                <option value="Arial, sans-serif">Arial</option>
-                <option value="'Segoe UI', serif">Segoe UI</option>
-                <option value="'Roboto', sans-serif">Roboto</option>
-                <option value="'Times New Roman', serif">Times New Roman</option>
-                <option value="'Courier New', monospace">Courier New</option>
-            </select>
-        </div>
-        <div class="setting-group">
-            <label for="font-weight">Font Weight:</label>
-            <input type="number" id="font-weight" value="400" min="100" max="900">
-        </div>
-        <div class="setting-group">
-            <label for="font-size">Font Size (px):</label>
-            <input type="number" id="font-size" value="16" min="8" max="72">
-        </div>
-        <div class="setting-group">
-            <label for="spacing-input">Base Spacing (px):</label>
-            <input type="number" id="spacing-input" value="8" min="0">
-        </div>
-        <div class="setting-group">
-            <label for="button-radius">Button Radius (px):</label>
-            <input type="number" id="button-radius" value="6" min="0">
-        </div>
-        <div class="setting-group">
-            <label for="text-color">Text Color:</label>
-            <input type="color" id="text-color" value="#333333">
-        </div>
-        <div class="setting-group">
-            <label for="background-color">Background Color:</label>
-            <input type="color" id="background-color" value="#f5f5f5">
-        </div>
-        <div class="setting-group">
-            <label for="gradient-toggle">Gradient Background:</label>
-            <input type="checkbox" id="gradient-toggle">
+    <section class="panel">
+        <h2>Typography & Spacing</h2>
+
+        <div class="settings-grid">
+            <label>Font Family:
+                <select id="font-select">
+                    <option value="Inter, sans-serif">Inter</option>
+                    <option value="Roboto, sans-serif">Roboto</option>
+                    <option value="Poppins, sans-serif">Poppins</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="'Fira Code', monospace">Fira Code</option>
+                </select>
+            </label>
+
+            <label>Font Weight:
+                <input type="number" id="font-weight" value="400" min="100" max="900">
+            </label>
+
+            <label>Font Size (px):
+                <input type="number" id="font-size" value="16" min="8" max="72">
+            </label>
+
+            <label>Base Spacing (px):
+                <input type="number" id="spacing-input" value="8" min="0">
+            </label>
+
+            <label>Button Radius (px):
+                <input type="number" id="button-radius" value="6" min="0">
+            </label>
+
+            <label>Text Color:
+                <input type="color" id="text-color" value="#3b3b3b">
+            </label>
+
+            <label>Background Color:
+                <input type="color" id="background-color" value="#f3f3f3">
+            </label>
+
+            <label class="inline-flex">
+                <input type="checkbox" id="gradient-toggle">
+                <span>Gradient Background</span>
+            </label>
         </div>
     </section>
 
-    <section id="preview-section">
+    <section class="panel">
         <h2>Preview</h2>
         <div class="preview-box">
             <p>Sample Text</p>
@@ -67,19 +74,23 @@
         </div>
     </section>
 
-    <section id="css-section">
+    <section class="panel">
         <h2>Generated CSS</h2>
         <textarea id="css-output" rows="10" readonly></textarea>
-        <div class="buttons">
+
+        <div class="button-row">
             <button id="copy-css">Copy CSS</button>
             <button id="download-css">Download CSS</button>
             <button id="save-favorite">Save Favorite</button>
             <button id="export-json">Export JSON</button>
-            <button id="dark-mode-toggle">Toggle Dark Mode</button>
+            <button id="dark-mode-toggle" class="dark">Toggle Dark Mode</button>
         </div>
-        <div id="favorites-container"></div>
+
+        <div id="favorites-container" class="favorite-list"></div>
     </section>
+
 </main>
+
 <script src="script.js"></script>
 </body>
 </html>
