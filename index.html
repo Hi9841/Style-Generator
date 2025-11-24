@@ -3,25 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CSS Style Generator</title>
+<title>Pro Theme Builder 2.0</title>
 <link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 </head>
 <body>
 
 <header>
-    <h1>🎨 CSS Style Generator</h1>
-    <p>Create beautiful UI styles instantly.</p>
+    <h1>🎨 Pro Theme Builder 2.0</h1>
+    <p>Generate accessible, harmonious UI themes for web projects.</p>
 </header>
 
 <main class="layout">
 
     <section class="panel">
-        <h2>Color Palettes</h2>
+        <div class="panel-header">
+            <h2>Smart Palettes</h2>
+            <select id="harmony-select">
+                <option value="random">Random</option>
+                <option value="analogous">Analogous</option>
+                <option value="monochromatic">Monochromatic</option>
+                <option value="triadic">Triadic</option>
+                <option value="complementary">Complementary</option>
+            </select>
+        </div>
         <div id="palettes-container" class="palette-grid"></div>
+        <button id="generate-btn" class="full-width-btn">Generate New Palettes</button>
     </section>
 
     <section class="panel">
-        <h2>Typography & Spacing</h2>
+        <h2>Typography & Global Settings</h2>
 
         <div class="settings-grid">
             <label>Font Family:
@@ -29,61 +40,96 @@
                     <option value="Inter, sans-serif">Inter</option>
                     <option value="Roboto, sans-serif">Roboto</option>
                     <option value="Poppins, sans-serif">Poppins</option>
-                    <option value="Georgia, serif">Georgia</option>
+                    <option value="'Playfair Display', serif">Playfair Display</option>
                     <option value="'Fira Code', monospace">Fira Code</option>
                 </select>
             </label>
 
-            <label>Font Weight:
-                <input type="number" id="font-weight" value="400" min="100" max="900">
-            </label>
+            <div class="dual-input">
+                <label>Weight: <input type="number" id="font-weight" value="400" step="100" min="100" max="900"></label>
+                <label>Size: <input type="number" id="font-size" value="16" min="10" max="32"></label>
+            </div>
 
-            <label>Font Size (px):
-                <input type="number" id="font-size" value="16" min="8" max="72">
-            </label>
-
-            <label>Base Spacing (px):
-                <input type="number" id="spacing-input" value="8" min="0">
-            </label>
-
-            <label>Button Radius (px):
-                <input type="number" id="button-radius" value="6" min="0">
-            </label>
+            <div class="dual-input">
+                <label>Spacing: <input type="number" id="spacing-input" value="12" min="0"></label>
+                <label>Radius: <input type="number" id="button-radius" value="8" min="0"></label>
+            </div>
 
             <label>Text Color:
-                <input type="color" id="text-color" value="#3b3b3b">
+                <div class="color-input-wrapper">
+                    <input type="color" id="text-color" value="#1e293b">
+                    <span id="text-color-hex">#1e293b</span>
+                </div>
             </label>
 
-            <label>Background Color:
-                <input type="color" id="background-color" value="#f3f3f3">
+            <label>Background:
+                <div class="color-input-wrapper">
+                    <input type="color" id="background-color" value="#f8fafc">
+                    <span id="bg-color-hex">#f8fafc</span>
+                </div>
             </label>
+
+            <div id="a11y-status" class="a11y-box">
+                <span class="material-icons-round status-icon">check_circle</span>
+                <div class="a11y-text">
+                    <strong>Contrast Ratio: <span id="contrast-ratio">--</span></strong>
+                    <span id="wcag-grade">WCAG AA Pass</span>
+                </div>
+            </div>
 
             <label class="inline-flex">
                 <input type="checkbox" id="gradient-toggle">
-                <span>Gradient Background</span>
+                <span>Enable Gradient Background</span>
             </label>
         </div>
     </section>
 
-    <section class="panel">
-        <h2>Preview</h2>
+    <section class="panel preview-panel">
+        <h2>Live Preview</h2>
         <div class="preview-box">
-            <p>Sample Text</p>
-            <button>Sample Button</button>
-            <div class="card">Card Example</div>
+            <h3>Typography</h3>
+            <p>This is a paragraph of text to demonstrate readability and contrast settings.</p>
+            
+            <div class="component-row">
+                <button class="primary-btn">Primary Action</button>
+                <button class="secondary-btn">Secondary</button>
+            </div>
+
+            <div class="form-group">
+                <label>Input Field</label>
+                <input type="text" placeholder="Type something..." class="preview-input">
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4>Card Title</h4>
+                    <span class="badge">New</span>
+                </div>
+                <p>Cards automatically adapt to your secondary/accent colors.</p>
+            </div>
+
+            <div class="alert-box">
+                <span class="material-icons-round">info</span>
+                <span>System alert message styling.</span>
+            </div>
         </div>
     </section>
 
     <section class="panel">
-        <h2>Generated CSS</h2>
-        <textarea id="css-output" rows="10" readonly></textarea>
+        <div class="panel-header">
+            <h2>Export Code</h2>
+            <select id="export-format">
+                <option value="css">Standard CSS</option>
+                <option value="scss">SCSS Variables</option>
+                <option value="tailwind">Tailwind Config</option>
+            </select>
+        </div>
+        <textarea id="css-output" rows="12" readonly></textarea>
 
         <div class="button-row">
-            <button id="copy-css">Copy CSS</button>
-            <button id="download-css">Download CSS</button>
-            <button id="save-favorite">Save Favorite</button>
-            <button id="export-json">Export JSON</button>
-            <button id="dark-mode-toggle" class="dark">Toggle Dark Mode</button>
+            <button id="copy-css">Copy Code</button>
+            <button id="save-favorite">Save Theme</button>
+            <button id="dark-mode-toggle" class="dark">Dark Mode</button>
         </div>
 
         <div id="favorites-container" class="favorite-list"></div>
