@@ -1,223 +1,275 @@
-const palettesContainer = document.getElementById('palettes-container');
-const favoritesContainer = document.getElementById('favorites-container');
-const fontSelect = document.getElementById('font-select');
-const fontWeight = document.getElementById('font-weight');
-const fontSize = document.getElementById('font-size');
-const spacingInput = document.getElementById('spacing-input');
-const buttonRadius = document.getElementById('button-radius');
-const textColor = document.getElementById('text-color');
-const backgroundColor = document.getElementById('background-color');
-const gradientToggle = document.getElementById('gradient-toggle');
-const copyBtn = document.getElementById('copy-css');
-const downloadBtn = document.getElementById('download-css');
-const saveFavorite = document.getElementById('save-favorite');
-const exportJSON = document.getElementById('export-json');
-const darkModeToggle = document.getElementById('dark-mode-toggle');
-const cssOutput = document.getElementById('css-output');
-const previewBox = document.querySelector('.preview-box');
+/* ========== DOM ELEMENTS ========== */
+const elements = {
+    palettes: document.getElementById('palettes-container'),
+    harmonySelect: document.getElementById('harmony-select'),
+    generateBtn: document.getElementById('generate-btn'),
+    fontSelect: document.getElementById('font-select'),
+    inputs: {
+        weight: document.getElementById('font-weight'),
+        size: document.getElementById('font-size'),
+        spacing: document.getElementById('spacing-input'),
+        radius: document.getElementById('button-radius'),
+        text: document.getElementById('text-color'),
+        bg: document.getElementById('background-color'),
+        gradient: document.getElementById('gradient-toggle')
+    },
+    labels: {
+        textHex: document.getElementById('text-color-hex'),
+        bgHex: document.getElementById('bg-color-hex')
+    },
+    preview: {
+        box: document.querySelector('.preview-box'),
+        btnPrimary: document.querySelector('.primary-btn'),
+        btnSecondary: document.querySelector('.secondary-btn'),
+        card: document.querySelector('.card'),
+        alert: document.querySelector('.alert-box'),
+        badge: document.querySelector('.badge'),
+        input: document.querySelector('.preview-input')
+    },
+    a11y: {
+        box: document.getElementById('a11y-status'),
+        ratio: document.getElementById('contrast-ratio'),
+        grade: document.getElementById('wcag-grade'),
+        icon: document.querySelector('.status-icon')
+    },
+    output: {
+        css: document.getElementById('css-output'),
+        format: document.getElementById('export-format'),
+        copy: document.getElementById('copy-css')
+    }
+};
 
-let darkMode = false;
 let currentPalette = [];
+let isDarkMode = false;
 
-const predefinedPalettes = [
-  ['#0C2B4E','#1A3D64','#1D546C','#EEEEEE'],
-  ['#E3FDFD','#CBF1F5','#A6E3E9','#71C9CE'],
-  ['#F9F7F7','#DBE2EF','#3F72AF','#112D4E'],
-  ['#FFF5E4','#FFE3E1','#FFD1D1','#FF9494'],
-  ['#1B262C','#0F4C75','#3282B8','#1abc9c'],
-  ['#EDF1D6','#9DC08B','#609966','#40513B']
-];
+/* ========== COLOR UTILITIES (HSL & HEX) ========== */
 
-function randomColor(){
-    const r = Math.floor(Math.random()*256),
-          g = Math.floor(Math.random()*256),
-          b = Math.floor(Math.random()*256);
-    return `rgb(${r},${g},${b})`;
-}
-
-function generateRandomPalette(){
-    return [randomColor(), randomColor(), randomColor(), randomColor()];
-}
-
-function displayPalettes() {
-    const allPalettes = [...predefinedPalettes];
-    for(let i=0;i<6;i++) allPalettes.push(generateRandomPalette());
-    palettesContainer.innerHTML='';
-    allPalettes.forEach(palette=>{
-        const div=document.createElement('div'); div.classList.add('palette');
-        palette.forEach(c=>{
-            const box=document.createElement('div'); 
-            box.classList.add('color-box'); 
-            box.style.backgroundColor=c; 
-            div.appendChild(box); 
-        });
-        div.addEventListener('click',()=>{ currentPalette=[...palette]; updatePreview(); });
-        palettesContainer.appendChild(div);
-    });
-}
-
-function generateShades(color){
-    let r, g, b;
-    if(color.startsWith('rgb')){
-        [r, g, b] = color.match(/\d+/g).map(Number);
-    } else if(color.startsWith('#')){
-        let hex = color.replace('#','');
-        if(hex.length === 3){ hex = hex.split('').map(h=>h+h).join(''); }
-        r = parseInt(hex.substr(0,2),16);
-        g = parseInt(hex.substr(2,2),16);
-        b = parseInt(hex.substr(4,2),16);
-    } else { r = g = b = 128; }
-    const lighten=c=>Math.min(c+40,255), darken=c=>Math.max(c-40,0);
-    return { light:`rgb(${lighten(r)},${lighten(g)},${lighten(b)})`, dark:`rgb(${darken(r)},${darken(g)},${darken(b)})` };
-}
-
-function getContrastColor(color){
-    let r,g,b;
-    if(color.startsWith('rgb')){
-        [r,g,b] = color.match(/\d+/g).map(Number);
-    } else {
-        let hex = color.replace('#','');
-        if(hex.length === 3){ hex = hex.split('').map(h=>h+h).join(''); }
-        r = parseInt(hex.substr(0,2),16);
-        g = parseInt(hex.substr(2,2),16);
-        b = parseInt(hex.substr(4,2),16);
-    }
-    const brightness = (r*299 + g*587 + b*114) / 1000;
-    return brightness > 125 ? '#000' : '#fff';
-}
-
-function updatePreview(){
-    if(!currentPalette.length) currentPalette=['#3498db','#2ecc71','#e74c3c','#f1c40f'];
-    const [primary, secondary, accent, extra] = currentPalette;
-    const shades={primary:generateShades(primary), secondary:generateShades(secondary), accent:generateShades(accent), extra:generateShades(extra)};
-    const font=fontSelect.value;
-    const weight = fontWeight ? fontWeight.value : '400';
-    const size = fontSize ? fontSize.value+'px' : '16px';
-    const spacing = spacingInput.value+'px';
-    const radius = buttonRadius.value+'px';
-    const text = textColor.value || '#000000';
-    const bg = backgroundColor.value || '#ffffff';
-
-    previewBox.style.fontFamily = font;
-    previewBox.style.fontWeight = weight;
-    previewBox.style.fontSize = size;
-    previewBox.style.color = text;
-    previewBox.style.padding = spacing;
-
-    // make all children inherit font
-    previewBox.querySelectorAll('*').forEach(el=>{
-        el.style.fontFamily = font;
-        el.style.fontWeight = weight;
-        el.style.fontSize = size;
-    });
-
-    if(gradientToggle.checked){
-        previewBox.style.background = `linear-gradient(135deg, ${primary}, ${secondary}, ${accent}, ${extra})`;
-    } else {
-        previewBox.style.background = '';
-        previewBox.style.backgroundColor = bg;
-    }
-
-    const button = previewBox.querySelector('button');
-    button.style.borderRadius = radius;
-    button.style.padding = spacing;
-    button.style.backgroundColor = primary;
-    button.style.color = getContrastColor(primary);
-
-    const card = previewBox.querySelector('.card');
-    if(card){
-        card.style.backgroundColor = accent;
-        card.style.color = getContrastColor(accent);
-        card.style.padding = spacing;
-        card.style.borderRadius = radius;
-    }
-
-    cssOutput.value=`:root {
-  --primary-color: ${primary};
-  --secondary-color: ${secondary};
-  --accent-color: ${accent};
-  --extra-color: ${extra};
-  --font-family: ${font};
-  --font-weight: ${weight};
-  --font-size: ${size};
-  --base-spacing: ${spacing};
-  --button-radius: ${radius};
-  --text-color: ${text};
-  --background-color: ${bg};
-  --gradient: ${gradientToggle.checked?'linear-gradient(135deg,'+primary+','+secondary+','+accent+','+extra+')':'none'};
-}`;
-}
-
-
-[fontSelect,fontWeight,fontSize,spacingInput,buttonRadius,textColor,backgroundColor,gradientToggle].forEach(el=>{
-    el.addEventListener('input',updatePreview);
-    el.addEventListener('change',updatePreview);
-});
-
-copyBtn.addEventListener('click', ()=>navigator.clipboard.writeText(cssOutput.value));
-downloadBtn.addEventListener('click', ()=>{
-    const blob = new Blob([cssOutput.value],{type:'text/css'});
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download='style.css';
-    link.click();
-    URL.revokeObjectURL(link.href);
-});
-
-darkModeToggle.addEventListener('click', ()=>{
-    darkMode = !darkMode;
-    const bg = darkMode?'#2c3e50':'#f5f5f5';
-    const text = darkMode?'#ecf0f1':'#333333';
-    backgroundColor.value = bg; textColor.value = text;
-    updatePreview();
-});
-
-saveFavorite.addEventListener('click', ()=>{
-    const favorites = JSON.parse(localStorage.getItem('favorites')||'[]');
-    favorites.push([...currentPalette]);
-    localStorage.setItem('favorites',JSON.stringify(favorites));
-    loadFavorites();
-});
-
-exportJSON.addEventListener('click', ()=>{
-    const data={
-        palette: currentPalette,
-        font: fontSelect.value,
-        fontWeight: fontWeight.value,
-        fontSize: fontSize.value,
-        spacing: spacingInput.value,
-        buttonRadius: buttonRadius.value,
-        textColor: textColor.value,
-        bgColor: backgroundColor.value,
-        gradient: gradientToggle.checked
+// Convert HSL to Hex
+function hslToHex(h, s, l) {
+    l /= 100;
+    const a = s * Math.min(l, 1 - l) / 100;
+    const f = n => {
+        const k = (n + h / 30) % 12;
+        const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * color).toString(16).padStart(2, '0');
     };
-    const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-    const link=document.createElement('a');
-    link.href=URL.createObjectURL(blob);
-    link.download='theme.json';
-    link.click();
-    URL.revokeObjectURL(link.href);
-});
-
-function loadFavorites(){
-    favoritesContainer.innerHTML='';
-    const favorites = JSON.parse(localStorage.getItem('favorites')||'[]');
-    favorites.forEach((palette,index)=>{
-        const div = document.createElement('div'); div.classList.add('palette');
-        palette.forEach(c=>{ const box=document.createElement('div'); box.classList.add('color-box'); box.style.backgroundColor=c; div.appendChild(box); });
-        const removeBtn = document.createElement('button'); removeBtn.textContent='✕';
-        removeBtn.addEventListener('click', e=>{
-            e.stopPropagation();
-            favorites.splice(index,1);
-            localStorage.setItem('favorites',JSON.stringify(favorites));
-            loadFavorites();
-        });
-        div.appendChild(removeBtn);
-        div.addEventListener('click',()=>{ currentPalette=[...palette]; updatePreview(); });
-        favoritesContainer.appendChild(div);
-    });
+    return `#${f(0)}${f(8)}${f(4)}`;
 }
 
-displayPalettes();
-loadFavorites();
-updatePreview();
+// Generate Harmony Palettes
+function generatePalette(type) {
+    const h = Math.floor(Math.random() * 360);
+    const s = Math.floor(Math.random() * 40) + 60; // Vibrant saturation
+    const l = Math.floor(Math.random() * 30) + 40; // Mid-range lightness
+
+    let colors = [];
+
+    switch (type) {
+        case 'analogous':
+            colors = [0, 30, 60, 90].map(offset => hslToHex((h + offset) % 360, s, l));
+            break;
+        case 'monochromatic':
+            colors = [90, 70, 50, 30].map(light => hslToHex(h, s, light));
+            break;
+        case 'triadic':
+            colors = [0, 120, 240, 0].map((offset, i) => hslToHex((h + offset) % 360, s, i === 3 ? 90 : l));
+            break;
+        case 'complementary':
+            colors = [hslToHex(h, s, l), hslToHex((h + 180) % 360, s, l), hslToHex(h, s - 20, 90), hslToHex((h + 180) % 360, s - 20, 20)];
+            break;
+        default: // Random
+            colors = Array(4).fill(0).map(() => hslToHex(Math.random() * 360, 70, 50));
+    }
+    return colors;
+}
+
+/* ========== ACCESSIBILITY LOGIC (WCAG) ========== */
+
+function getLuminance(hex) {
+    const rgb = parseInt(hex.slice(1), 16);
+    const r = ((rgb >> 16) & 0xff) / 255;
+    const g = ((rgb >> 8) & 0xff) / 255;
+    const b = ((rgb >> 0) & 0xff) / 255;
+    const a = [r, g, b].map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+    return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+}
+
+function checkContrast(c1, c2) {
+    const l1 = getLuminance(c1);
+    const l2 = getLuminance(c2);
+    const ratio = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    return ratio.toFixed(2);
+}
+
+function updateAccessibilityInfo(text, bg) {
+    const ratio = checkContrast(text, bg);
+    elements.a11y.ratio.innerText = ratio;
+
+    if (ratio >= 4.5) {
+        elements.a11y.box.className = 'a11y-box pass';
+        elements.a11y.grade.innerText = "Pass (AA)";
+        elements.a11y.icon.innerText = "check_circle";
+    } else {
+        elements.a11y.box.className = 'a11y-box fail';
+        elements.a11y.grade.innerText = "Fail (Too Low)";
+        elements.a11y.icon.innerText = "warning";
+    }
+}
+
+/* ========== CORE FUNCTIONS ========== */
+
+function renderPalettes() {
+    elements.palettes.innerHTML = '';
+    const type = elements.harmonySelect.value;
+    
+    for (let i = 0; i < 8; i++) {
+        const colors = generatePalette(type);
+        const div = document.createElement('div');
+        div.className = 'palette';
+        colors.forEach(c => {
+            const box = document.createElement('div');
+            box.className = 'color-box';
+            box.style.backgroundColor = c;
+            div.appendChild(box);
+        });
+        div.onclick = () => applyPalette(colors);
+        elements.palettes.appendChild(div);
+    }
+}
+
+function applyPalette(colors) {
+    currentPalette = colors;
+    // Auto-assign logical colors
+    elements.preview.btnPrimary.style.backgroundColor = colors[0];
+    elements.preview.btnPrimary.style.color = parseInt(checkContrast('#ffffff', colors[0])) > 3 ? '#ffffff' : '#000000';
+    
+    elements.preview.btnSecondary.style.backgroundColor = colors[1];
+    elements.preview.btnSecondary.style.color = parseInt(checkContrast('#ffffff', colors[1])) > 3 ? '#ffffff' : '#000000';
+
+    const card = elements.preview.card;
+    card.style.borderTop = `4px solid ${colors[2]}`;
+    elements.preview.badge.style.backgroundColor = colors[2];
+    elements.preview.badge.style.color = parseInt(checkContrast('#ffffff', colors[2])) > 3 ? '#ffffff' : '#000000';
+    
+    updatePreview();
+}
+
+function updatePreview() {
+    const styles = {
+        font: elements.fontSelect.value,
+        weight: elements.inputs.weight.value,
+        size: elements.inputs.size.value + 'px',
+        spacing: elements.inputs.spacing.value + 'px',
+        radius: elements.inputs.radius.value + 'px',
+        text: elements.inputs.text.value,
+        bg: elements.inputs.bg.value
+    };
+
+    // Update Text Labels
+    elements.labels.textHex.innerText = styles.text;
+    elements.labels.bgHex.innerText = styles.bg;
+
+    // Apply to Preview Box
+    const box = elements.preview.box;
+    box.style.fontFamily = styles.font;
+    box.style.color = styles.text;
+    
+    if(elements.inputs.gradient.checked && currentPalette.length > 0) {
+        box.style.background = `linear-gradient(135deg, ${currentPalette[0]}22, ${currentPalette[1]}22)`;
+    } else {
+        box.style.background = styles.bg;
+    }
+
+    // Apply Shared Styles
+    box.querySelectorAll('button, input, .card, .alert-box').forEach(el => {
+        el.style.borderRadius = styles.radius;
+    });
+
+    box.style.gap = styles.spacing;
+    elements.preview.card.style.padding = styles.spacing;
+    elements.preview.alert.style.padding = styles.spacing;
+
+    // Accessibility Check
+    updateAccessibilityInfo(styles.text, styles.bg);
+
+    // Generate Code
+    generateCode(styles);
+}
+
+function generateCode(s) {
+    const format = elements.output.format.value;
+    let code = '';
+
+    if (format === 'css') {
+        code = `:root {
+  --primary: ${currentPalette[0] || '#000'};
+  --secondary: ${currentPalette[1] || '#333'};
+  --accent: ${currentPalette[2] || '#555'};
+  --bg-color: ${s.bg};
+  --text-color: ${s.text};
+  --font-main: ${s.font};
+  --spacing: ${s.spacing};
+  --radius: ${s.radius};
+}`;
+    } else if (format === 'scss') {
+        code = `$primary: ${currentPalette[0] || '#000'};
+$secondary: ${currentPalette[1] || '#333'};
+$accent: ${currentPalette[2] || '#555'};
+$bg-color: ${s.bg};
+$text-color: ${s.text};
+$font-stack: ${s.font};
+$base-spacing: ${s.spacing};
+$border-radius: ${s.radius};`;
+    } else if (format === 'tailwind') {
+        code = `module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '${currentPalette[0] || '#000'}',
+        secondary: '${currentPalette[1] || '#333'}',
+        accent: '${currentPalette[2] || '#555'}',
+        background: '${s.bg}',
+        text: '${s.text}',
+      },
+      fontFamily: {
+        main: ['${s.font.split(',')[0].replace(/'/g, "")}'],
+      },
+      borderRadius: {
+        DEFAULT: '${s.radius}',
+      }
+    }
+  }
+}`;
+    }
+
+    elements.output.css.value = code;
+}
+
+/* ========== EVENT LISTENERS ========== */
+
+// Inputs
+Object.values(elements.inputs).forEach(input => {
+    input.addEventListener('input', updatePreview);
+});
+elements.fontSelect.addEventListener('change', updatePreview);
+elements.output.format.addEventListener('change', updatePreview);
+
+// Palette Generation
+elements.generateBtn.addEventListener('click', renderPalettes);
+elements.harmonySelect.addEventListener('change', renderPalettes);
+
+// Copy Button
+elements.output.copy.addEventListener('click', () => {
+    elements.output.css.select();
+    document.execCommand('copy');
+    elements.output.copy.textContent = 'Copied!';
+    setTimeout(() => elements.output.copy.textContent = 'Copy Code', 1500);
+});
+
+/* ========== INITIALIZATION ========== */
+renderPalettes();
+// Select the first generated palette by default
+setTimeout(() => {
+    const firstPalette = elements.palettes.firstChild;
+    if(firstPalette) firstPalette.click();
+}, 100);
